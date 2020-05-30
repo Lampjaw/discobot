@@ -1,6 +1,8 @@
 ﻿using Discord;
 using Discord.Commands;
 using System;
+using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace discobot
@@ -81,7 +83,7 @@ namespace discobot
                     .WithTitle(np.Video.Title)
                     .WithUrl(np.Video.Url)
                     .WithAuthor("Now Playing♪", Context.Client.CurrentUser.GetAvatarUrl())
-                    .WithDescription($"Requested by: {np.Requester}")
+                    .WithDescription($"`Requested by:` {np.Requester}")
                     .Build();
 
                 await ReplyAsync(embed: embed);
@@ -90,6 +92,64 @@ namespace discobot
             {
                 Console.WriteLine(ex);
             }
+        }
+
+        [Command("#q", RunMode = RunMode.Async)]
+        public async Task GetQueue()
+        {
+            try
+            {
+                var guildId = Context.Guild.Id.ToString();
+
+                var queue = _manager.GetQueue(guildId);
+
+                if (queue == null || !queue.Any())
+                {
+                    return;
+                }
+
+                var sb = new StringBuilder();
+
+                var truncQueue = queue.Take(10).ToList();
+                for(var i = 0; i < truncQueue.Count(); i++)
+                {
+                    sb.AppendLine($"`{i + 1}.` {truncQueue[i].Video.Title} | `{GetDurationString(truncQueue[i].Video.Duration)} Requested by: {truncQueue[i].Requester}`\n");
+                }
+
+                var totalDuration = new TimeSpan(queue.Sum(a => a.Video.Duration.Ticks));
+
+                sb.AppendLine($"**{queue.Count()} songs in queue | {totalDuration}**");
+
+                var embed = new EmbedBuilder()
+                    .WithTitle($"Queue for {Context.Guild.Name}")
+                    .WithDescription(sb.ToString())
+                    .Build();
+
+                await ReplyAsync(embed: embed);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+        }
+
+        private string GetDurationString(TimeSpan ts)
+        {
+            var duration = "";
+
+            if (ts.Hours > 1)
+            {
+                duration += $"{ts.Hours}:";
+            }
+
+            duration += $"{PadInt(ts.Minutes)}:{PadInt(ts.Seconds)}";
+
+            return duration;
+        }
+
+        private string PadInt(int value)
+        {
+            return value > 9 ? value.ToString() : $"0{value}";
         }
 
         [Command("#skip", RunMode = RunMode.Async)]

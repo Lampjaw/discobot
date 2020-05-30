@@ -1,5 +1,6 @@
 ﻿using Discord;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace discobot
@@ -12,5 +13,6 @@ namespace discobot
         void ClearQueue(string guildId);
         void ShuffleQueue(string guildId);
         void SkipCurrentPlaying(string guildId);
+        IEnumerable<QueueVideo> GetQueue(string guildId);
     }
 }

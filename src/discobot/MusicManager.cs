@@ -166,6 +166,16 @@ namespace discobot
             _guildSongState[guildId].Cancel();
         }
 
+        public IEnumerable<QueueVideo> GetQueue(string guildId)
+        {
+            if (!_videoQueue.ContainsKey(guildId))
+            {
+                return null;
+            }
+
+            return _videoQueue[guildId].ToList();
+        }
+
         private async Task<IEnumerable<Video>> GetPlaylistAsync(string playlistId)
         {
             return await _ytClient.Playlists.GetVideosAsync(playlistId);
